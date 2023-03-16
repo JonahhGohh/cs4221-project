@@ -22,7 +22,7 @@ def start_experiment():
     sum_a()
 
 
-def sum_a():
+def sum_b():
     conn = get_conn()
     cur = conn.cursor()
     cur.execute(f"SELECT SUM(b) FROM {table_name}")
