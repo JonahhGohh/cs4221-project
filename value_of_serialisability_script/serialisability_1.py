@@ -1,4 +1,5 @@
 import psycopg2
+from random import randint
 
 # To setup:
 # Step 1: Activate virtual env, e.g. by running 'venv\Scripts\Activate'
@@ -19,7 +20,7 @@ table_name = "serialisability_1"
 def start_experiment():
     # Each thread probably needs a separate connection (?) for the transactions to be isolated on programme level?
     # because https://www.psycopg.org/docs/cursor.html 'Cursors created from the same connection are not isolated' ??
-    sum_a()
+    sum_b()
 
 
 def sum_b():
@@ -32,6 +33,15 @@ def sum_b():
     conn.close()
     return
 
+# new connection created for each thread
+def transfer_b(id, length):
+    conn = get_conn()
+    cur = conn.cursor()
+    transfer_amount = randint(1, 100)
+    cur.execute(f"UPDATE {table_name} SET b = b - transfer_amount WHERE a = {id}")
+    cur.execute(f"UPDATE {table_name} SET b = b + transfer_amount where a = {(id + 1) % length}")
+    cur.close()
+    conn.close()
 
 def setup_db():
     conn = get_conn()
