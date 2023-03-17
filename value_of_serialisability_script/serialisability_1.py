@@ -27,19 +27,17 @@ def sum_b():
     conn = get_conn()
     cur = conn.cursor()
     cur.execute(f"SELECT SUM(b) FROM {table_name}")
-    for row in cur:
-        print('sum', row[0])
+    result = cur[0][0]
     cur.close()
     conn.close()
-    return
+    return result
 
 # new connection created for each thread
-def transfer_b(id, length):
+def swap_b(id, length):
     conn = get_conn()
     cur = conn.cursor()
-    transfer_amount = randint(1, 100)
-    cur.execute(f"UPDATE {table_name} SET b = b - transfer_amount WHERE a = {id}")
-    cur.execute(f"UPDATE {table_name} SET b = b + transfer_amount where a = {(id + 1) % length}")
+    cur.execute(f"UPDATE {table_name} SET b = b - 100 WHERE a = {id}")
+    cur.execute(f"UPDATE {table_name} SET b = b + 100 where a = {(id + 1) % length}")
     cur.close()
     conn.close()
 

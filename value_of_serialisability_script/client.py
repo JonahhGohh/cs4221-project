@@ -1,25 +1,62 @@
-from serialisability_1 import sum_b
-from serialisability_1 import transfer_b
-from threading import Thread
+from serialisability_1 import *
+from threading import Thread, Lock
 from random import randint
 
 NUM_THREADS = 20
-LENGTH = 1000
+NUM_OF_ROWS_IN_DATA = 1000
+id_counter = 0
+END_FLAG = False
+CONSTANT_SUM = 1000000
+NUM_OF_SWAP_TRANSACTION = 1000
+id_counter_lock = Lock()
+end_flag_lock = Lock()
 
-def spawn_sum_clients():
-  threads = list()
+def execute_sum_client():
+  sum_count = 0
+  sum_correct_count = 0
+  # END_FLAG should not need to be wrapped a mutex because only 1 swap thread writes and 1 sum thread reads
+  while True:
+    end_flag_lock.lock()
+    if END_FLAG:
+      end_flag_lock.acquire()
+      break
+    end_flag_lock.acquire()
+    sum_count += 1
+    result = sum_b()
+    if result == CONSTANT_SUM:
+      sum_correct_count += 1
+  return (sum_count, sum_correct_count)
+    
+def execute_swap_client():
+  # wrap COUNTER variable in mutex
+  while True:
+    id_counter_lock.acquire()
+    if id_counter >= NUM_OF_SWAP_TRANSACTION * 2:
+      id_counter_lock.release()
+      break
+    id_counter += 2
+    id_counter_lock.release()
+    swap_b(id_counter, NUM_OF_ROWS_IN_DATA)
+  # wrap in mutex
+  if END_FLAG == False:
+    END_FLAG = True
+    
+def client(num_threads):
+  # setup db
+  setup_db()
+  # execute the sum_thread
+  sum_thread = Thread(target=execute_sum_client)
+  # execute all the swap threads
+  # start timer
+  swap_threads = list()
   for i in range(NUM_THREADS):
-    thread = Thread(target = sum_b)
-    threads.append(thread)
+    swap_thread = Thread(target=execute_swap_client)
+    swap_threads.append(swap_thread)
   for i in range(NUM_THREADS):
-    threads[i].join()
-
-def spawn_transfer_clients():
-  threads = list()
-  for i in range(NUM_THREADS):
-    rand_id = randint(1, LENGTH)
-    thread = Thread(target = transfer_b, args = (rand_id, LENGTH))
-    threads.append(thread)
-  for i in range(NUM_THREADS):
-    threads[i].join()
+    swap_threads[i].join()
+  # end timer
+  sum_thread.join()
+  (sum_count, sum_correct_count) = sum_thread.result
+  
+  
     
