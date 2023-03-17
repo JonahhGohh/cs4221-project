@@ -16,11 +16,11 @@ def execute_sum_client():
   sum_correct_count = 0
   # END_FLAG should not need to be wrapped a mutex because only 1 swap thread writes and 1 sum thread reads
   while True:
-    end_flag_lock.lock()
-    if END_FLAG:
-      end_flag_lock.acquire()
-      break
     end_flag_lock.acquire()
+    if END_FLAG:
+      end_flag_lock.release()
+      break
+    end_flag_lock.release()
     sum_count += 1
     result = sum_b()
     if result == CONSTANT_SUM:
@@ -38,8 +38,10 @@ def execute_swap_client():
     id_counter_lock.release()
     swap_b(id_counter, NUM_OF_ROWS_IN_DATA)
   # wrap in mutex
+  end_flag_lock.acquire()
   if END_FLAG == False:
     END_FLAG = True
+  end_flag_lock.release()
     
 def client(num_threads):
   # setup db
