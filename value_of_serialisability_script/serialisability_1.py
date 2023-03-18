@@ -41,11 +41,16 @@ def swap_b(isolation_level, first_id):
     conn = get_conn()
     conn.set_isolation_level(isolation_level)
     cur = conn.cursor()
-    cur.execute(f"SELECT b FROM {table_name} WHERE a = {first_id} OR a = {second_id} ORDER BY a")
-    rows = [row[0] for row in cur.fetchall()]
-    first_b, second_b = rows
-    cur.execute(f"UPDATE {table_name} SET b = {second_b} WHERE a = {first_id}")
-    cur.execute(f"UPDATE {table_name} SET b = {first_b} WHERE a = {second_id}")
+
+    cur.execute(f"UPDATE {table_name} SET b = b - 100 WHERE a = {first_id}")
+    cur.execute(f"UPDATE {table_name} SET b = b + 100 where a = {second_id}")
+
+    # cur.execute(f"SELECT b FROM {table_name} WHERE a = {first_id} OR a = {second_id} ORDER BY a")
+    # rows = [row[0] for row in cur.fetchall()]
+    # first_b, second_b = rows
+    # cur.execute(f"UPDATE {table_name} SET b = {second_b} WHERE a = {first_id}")
+    # cur.execute(f"UPDATE {table_name} SET b = {first_b} WHERE a = {second_id}")
+
     conn.commit()
     cur.close()
     conn.close()
