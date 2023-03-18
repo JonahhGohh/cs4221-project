@@ -20,7 +20,8 @@ table_name = "serialisability_1"
 def start_experiment():
     # Each thread probably needs a separate connection (?) for the transactions to be isolated on programme level?
     # because https://www.psycopg.org/docs/cursor.html 'Cursors created from the same connection are not isolated' ??
-    sum_b()
+    sum_b(3)
+    swap_b(3, 1)
 
 
 def sum_b(isolation_level):
@@ -28,7 +29,8 @@ def sum_b(isolation_level):
     conn.set_isolation_level(isolation_level)
     cur = conn.cursor()
     cur.execute(f"SELECT SUM(b) FROM {table_name}")
-    result = cur[0][0]
+    rows = cur.fetchone()
+    result = rows[0][0]
     cur.close()
     conn.close()
     return result
@@ -40,8 +42,9 @@ def swap_b(isolation_level, first_id):
     conn.set_isolation_level(isolation_level)
     cur = conn.cursor()
     cur.execute(f"SELECT b FROM {table_name} WHERE a = {first_id} OR a = {second_id} ORDER BY a")
-    first_b = cur[0][0]
-    second_b = cur[1][0]
+    rows = cur.fetchmany(2)
+    first_b = rows[0][0]
+    second_b = rows[1][0]
     cur.execute(f"UPDATE {table_name} SET b = {second_b} WHERE a = {first_id}")
     cur.execute(f"UPDATE {table_name} SET b = {first_b} WHERE a = {second_id}")
     conn.commit()
