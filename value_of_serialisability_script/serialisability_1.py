@@ -35,7 +35,7 @@ def sum_b(isolation_level):
 
 # new connection created for each thread
 def swap_b(isolation_level, first_id):
-    second_id = id + 1
+    second_id = first_id + 1
     conn = get_conn()
     conn.set_isolation_level(psycopg2.extensions[isolation_level])
     cur = conn.cursor()
