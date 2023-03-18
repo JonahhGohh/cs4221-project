@@ -25,7 +25,7 @@ def start_experiment():
 
 def sum_b(isolation_level):
     conn = get_conn()
-    conn.set_isolation_level(psycopg2.extensions[isolation_level])
+    conn.set_isolation_level(isolation_level)
     cur = conn.cursor()
     cur.execute(f"SELECT SUM(b) FROM {table_name}")
     result = cur[0][0]
@@ -37,7 +37,7 @@ def sum_b(isolation_level):
 def swap_b(isolation_level, first_id):
     second_id = first_id + 1
     conn = get_conn()
-    conn.set_isolation_level(psycopg2.extensions[isolation_level])
+    conn.set_isolation_level(isolation_level)
     cur = conn.cursor()
     cur.execute(f"SELECT b FROM {table_name} WHERE a = {first_id} OR a = {second_id} ORDER BY a")
     first_b = cur[0][0]
