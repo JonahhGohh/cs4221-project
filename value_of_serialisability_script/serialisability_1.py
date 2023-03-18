@@ -29,8 +29,8 @@ def sum_b(isolation_level):
     conn.set_isolation_level(isolation_level)
     cur = conn.cursor()
     cur.execute(f"SELECT SUM(b) FROM {table_name}")
-    rows = cur.fetchone()
-    result = rows[0][0]
+    row = cur.fetchone()
+    result = row[0]
     cur.close()
     conn.close()
     return result
@@ -42,9 +42,8 @@ def swap_b(isolation_level, first_id):
     conn.set_isolation_level(isolation_level)
     cur = conn.cursor()
     cur.execute(f"SELECT b FROM {table_name} WHERE a = {first_id} OR a = {second_id} ORDER BY a")
-    rows = cur.fetchmany(2)
-    first_b = rows[0][0]
-    second_b = rows[1][0]
+    rows = [row[0] for row in cur.fetchall()]
+    first_b, second_b = rows
     cur.execute(f"UPDATE {table_name} SET b = {second_b} WHERE a = {first_id}")
     cur.execute(f"UPDATE {table_name} SET b = {first_b} WHERE a = {second_id}")
     conn.commit()
