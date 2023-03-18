@@ -14,7 +14,6 @@ end_flag_lock = Lock()
 def execute_sum_client():
   sum_count = 0
   sum_correct_count = 0
-  # END_FLAG should not need to be wrapped a mutex because only 1 swap thread writes and 1 sum thread reads
   while True:
     end_flag_lock.acquire()
     if END_FLAG:
@@ -28,7 +27,6 @@ def execute_sum_client():
   return (sum_count, sum_correct_count)
     
 def execute_swap_client():
-  # wrap COUNTER variable in mutex
   while True:
     id_counter_lock.acquire()
     if id_counter >= NUM_OF_SWAP_TRANSACTION * 2:
@@ -37,7 +35,6 @@ def execute_swap_client():
     id_counter += 2
     id_counter_lock.release()
     swap_b(id_counter, NUM_OF_ROWS_IN_DATA)
-  # wrap in mutex
   end_flag_lock.acquire()
   if END_FLAG == False:
     END_FLAG = True
