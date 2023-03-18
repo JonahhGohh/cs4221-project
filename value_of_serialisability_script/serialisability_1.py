@@ -23,8 +23,9 @@ def start_experiment():
     sum_b()
 
 
-def sum_b():
+def sum_b(isolation_level):
     conn = get_conn()
+    conn.set_isolation_level(psycopg2.extensions[isolation_level])
     cur = conn.cursor()
     cur.execute(f"SELECT SUM(b) FROM {table_name}")
     result = cur[0][0]
@@ -33,11 +34,17 @@ def sum_b():
     return result
 
 # new connection created for each thread
-def swap_b(id, length):
+def swap_b(isolation_level, first_id):
+    second_id = id + 1
     conn = get_conn()
+    conn.set_isolation_level(psycopg2.extensions[isolation_level])
     cur = conn.cursor()
-    cur.execute(f"UPDATE {table_name} SET b = b - 100 WHERE a = {id}")
-    cur.execute(f"UPDATE {table_name} SET b = b + 100 where a = {(id + 1) % length}")
+    cur.execute(f"SELECT b FROM {table_name} WHERE a = {first_id} OR a = {second_id} ORDER BY a")
+    first_b = cur[0][0]
+    second_b = cur[1][0]
+    cur.execute(f"UPDATE {table_name} SET b = {second_b} WHERE a = {first_id}")
+    cur.execute(f"UPDATE {table_name} SET b = {first_b} WHERE a = {second_id}")
+    conn.commit()
     cur.close()
     conn.close()
 

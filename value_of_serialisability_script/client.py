@@ -6,10 +6,17 @@ NUM_THREADS = 20
 NUM_OF_ROWS_IN_DATA = 1000
 id_counter = 0
 END_FLAG = False
-CONSTANT_SUM = 1000000
+CONSTANT_SUM = 500000500000
 NUM_OF_SWAP_TRANSACTION = 1000
 id_counter_lock = Lock()
 end_flag_lock = Lock()
+
+LIBRARY_ISOLATION_LEVELS = {
+  "READ_COMMITTED": "ISOLATION_LEVEL_READ_COMMITTED",
+  "REPEATABLE_READ": "ISOLATION_LEVEL_REPEATABLE_READ",
+  "SERIALIZABLE": "ISOLATION_LEVEL_SERIALIZABLE",
+}
+ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS["SERIALIZABLE"]
 
 def execute_sum_client():
   sum_count = 0
@@ -22,7 +29,7 @@ def execute_sum_client():
       break
     end_flag_lock.acquire()
     sum_count += 1
-    result = sum_b()
+    result = sum_b(ISOLATION_LEVEL)
     if result == CONSTANT_SUM:
       sum_correct_count += 1
   return (sum_count, sum_correct_count)
@@ -36,7 +43,7 @@ def execute_swap_client():
       break
     id_counter += 2
     id_counter_lock.release()
-    swap_b(id_counter, NUM_OF_ROWS_IN_DATA)
+    swap_b(ISOLATION_LEVEL, id_counter)
   # wrap in mutex
   if END_FLAG == False:
     END_FLAG = True
