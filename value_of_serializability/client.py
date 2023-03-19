@@ -1,3 +1,4 @@
+from stats import Statistics
 from db import *
 from threading import Thread, Lock
 from random import randint
@@ -17,7 +18,7 @@ LIBRARY_ISOLATION_LEVELS = {
   "REPEATABLE_READ": extensions.ISOLATION_LEVEL_REPEATABLE_READ,
   "SERIALIZABLE": extensions.ISOLATION_LEVEL_SERIALIZABLE,
 }
-ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS["SERIALIZABLE"]
+ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS["READ_COMMITTED"]
 
 def execute_sum_client(results):
   global END_FLAG
@@ -34,7 +35,12 @@ def execute_sum_client(results):
       break
     end_flag_lock.release()
     sum_count += 1
-    result = sum_b(ISOLATION_LEVEL)
+    result = 0
+    num_tries = 0
+    while result == 0:
+      num_tries += 1
+      result = sum_b(ISOLATION_LEVEL)
+       
     if result == CONSTANT_SUM:
       sum_correct_count += 1
 
@@ -70,8 +76,10 @@ def main():
   # execute the sum_thread
   results = []
   sum_thread = Thread(target=execute_sum_client, args=(results,))
-
   swap_threads = list()
+
+  # create statistics object
+  stats = Statistics()
 
   # execute all the swap threads
   for i in range(NUM_THREADS):
@@ -79,17 +87,25 @@ def main():
     swap_threads.append(swap_thread)
 
   # start timer
+  stats.start_timer()
   sum_thread.start()
   for i in range(NUM_THREADS):
     swap_threads[i].start()
   for i in range(NUM_THREADS):
     swap_threads[i].join()
   # end timer
+  stats.end_timer()
   sum_thread.join()
   (sum_count, sum_correct_count) = results[0]
-  print('sum_count', sum_count)
-  print('sum_correct_count', sum_correct_count)
-  
+
+  stats.set_sum_count(sum_count)
+  stats.set_sum_correct_count(sum_correct_count)
+  stats.print_stats()  
 if __name__ == '__main__':
     main()
     
+
+def process_swap_thread(thread):
+  time
+  thread.start()
+
