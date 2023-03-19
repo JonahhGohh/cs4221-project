@@ -3,7 +3,6 @@ from threading import Thread, Lock
 from psycopg2 import extensions
 
 NUM_THREADS = 20
-NUM_OF_ROWS_IN_DATA = 100000
 CONSTANT_SUM = 500000500000
 NUM_OF_SWAP_TRANSACTION = 1000
 id_counter = 1
