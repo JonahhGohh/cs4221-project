@@ -39,8 +39,13 @@ class Statistics:
             return self.sum_count/self.get_response_time()
     
     def print_stats(self):
+        print("---------------- STATISTICS -----------------")
+
         ratio_correct_sum = self.get_ratio_correct_count()
         print("Ratio of Correct Sum Count: ", ratio_correct_sum if ratio_correct_sum != -1 else "INVALID")
 
         throughput = self.get_throughput()
         print("Throughput: ", throughput if throughput != -1 else "INVALID")
+        
+        print("---------------------------------------------")
+

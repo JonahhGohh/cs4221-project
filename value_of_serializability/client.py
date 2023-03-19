@@ -20,6 +20,14 @@ LIBRARY_ISOLATION_LEVELS = {
 }
 ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS["READ_COMMITTED"]
 
+def print_experiment_settings():
+  print("------------ EXPERIMENT SETTINGS ------------")
+  print("Number of Rows In Data: ", NUM_OF_ROWS_IN_DATA)
+  print("Number of Swap Transactions: ", NUM_OF_SWAP_TRANSACTION)
+  print("Isolation Level: ", ISOLATION_LEVEL)
+  print("---------------------------------------------")
+
+
 def execute_sum_client(results):
   global END_FLAG
   global ISOLATION_LEVEL
@@ -67,12 +75,16 @@ def execute_swap_client():
     END_FLAG = True
   end_flag_lock.release()
     
+
 def main():
   global NUM_THREADS
   
   # setup db
   setup_db()
 
+  # print the experiment settings
+  print_experiment_settings()
+  
   # execute the sum_thread
   results = []
   sum_thread = Thread(target=execute_sum_client, args=(results,))
