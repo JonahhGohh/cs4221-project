@@ -16,23 +16,31 @@ table_name = "serializability_1"
 
 def sum_b(isolation_level):
     conn = get_conn()
-    conn.set_isolation_level(isolation_level)
-    cur = conn.cursor()
     result = 0 # If serialization error, return 0 to cause wrong result instead of crashing the script
 
-    try:
-        cur.execute(f"SELECT SUM(b) FROM {table_name}")
-        row = cur.fetchone()
-        result = row[0]
+    retries = 0
+    while True:
+        conn.set_isolation_level(isolation_level)
+        cur = conn.cursor()
+        if retries >= 10:
+            break
+        try:
+            cur.execute(f"SELECT SUM(b) FROM {table_name}")
+            row = cur.fetchone()
+            result = row[0]
+            cur.close()
+            break
 
-    except psycopg2.errors.SerializationFailure as error:
-        print('sum_b(): ***psycopg2.errors.SerializationFailure***')
+        except psycopg2.errors.SerializationFailure as error:
+            print('sum_b(): ***psycopg2.errors.SerializationFailure***')
 
-    except Exception as error:
-        print(error)
-        print('\n')
-
-    cur.close()
+        except Exception as error:
+            retries += 1
+            print(error)
+            print('\n')
+            cur.close()
+            conn.rollback()
+    
     conn.close()
     return result
 
@@ -40,28 +48,37 @@ def sum_b(isolation_level):
 def swap_b(isolation_level, first_id):
     second_id = first_id + 1
     conn = get_conn()
-    conn.set_isolation_level(isolation_level)
-    cur = conn.cursor()
 
-    try:
-        cur.execute(f"UPDATE {table_name} SET b = b - 100 WHERE a = {first_id}")
-        cur.execute(f"UPDATE {table_name} SET b = b + 100 where a = {second_id}")
+    retries = 0
+    while True:
+        conn.set_isolation_level(isolation_level)
+        cur = conn.cursor()
+        if retries >= 10:
+            break
+        try:
+            cur.execute(f"UPDATE {table_name} SET b = b - 100 WHERE a = {first_id}")
+            cur.execute(f"UPDATE {table_name} SET b = b + 100 where a = {second_id}")
+            
 
-        # cur.execute(f"SELECT b FROM {table_name} WHERE a = {first_id} OR a = {second_id} ORDER BY a")
-        # rows = [row[0] for row in cur.fetchall()]
-        # first_b, second_b = rows
-        # cur.execute(f"UPDATE {table_name} SET b = {second_b} WHERE a = {first_id}")
-        # cur.execute(f"UPDATE {table_name} SET b = {first_b} WHERE a = {second_id}")
-        conn.commit()
+            # cur.execute(f"SELECT b FROM {table_name} WHERE a = {first_id} OR a = {second_id} ORDER BY a")
+            # rows = [row[0] for row in cur.fetchall()]
+            # first_b, second_b = rows
+            # cur.execute(f"UPDATE {table_name} SET b = {second_b} WHERE a = {first_id}")
+            # cur.execute(f"UPDATE {table_name} SET b = {first_b} WHERE a = {second_id}")
+            conn.commit()
+            cur.close()
+            break
 
-    except psycopg2.errors.SerializationFailure as error:
-        print('swap_b(): ***psycopg2.errors.SerializationFailure***')
+        except psycopg2.errors.SerializationFailure as error:
+            print('swap_b(): ***psycopg2.errors.SerializationFailure***')
 
-    except Exception as error:
-        print(error)
-        print('\n')
+        except Exception as error:
+            retries += 1 
+            print(error)
+            print('\n')
+            cur.close()
+            conn.rollback()
 
-    cur.close()
     conn.close()
 
 
