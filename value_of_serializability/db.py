@@ -1,5 +1,4 @@
 import psycopg2
-from random import randint
 
 # To setup, follow README.md steps
 
@@ -13,14 +12,6 @@ db_config = {
 }
 
 table_name = "serializability_1"
-
-def start_experiment():
-    # Each thread probably needs a separate connection (?) for the transactions to be isolated on programme level?
-    # because https://www.psycopg.org/docs/cursor.html 'Cursors created from the same connection are not isolated' ??
-    sum_b(3)
-    swap_b(3, 1)
-    print('***** Done *****')
-
 
 def sum_b(isolation_level):
     conn = get_conn()
@@ -52,6 +43,7 @@ def swap_b(isolation_level, first_id):
     conn.commit()
     cur.close()
     conn.close()
+
 
 def setup_db():
     conn = get_conn()
@@ -85,10 +77,6 @@ def get_file(filename):
     return file
 
 
-def main():
-    setup_db()
-    start_experiment()
 
 
-if __name__ == '__main__':
-    main()
+

@@ -1,4 +1,4 @@
-from serialisability_1 import *
+from db import *
 from threading import Thread, Lock
 from random import randint
 from psycopg2 import extensions
@@ -48,7 +48,7 @@ def execute_swap_client():
     END_FLAG = True
   end_flag_lock.release()
     
-def client(num_threads):
+def main():
   # setup db
   setup_db()
   # execute the sum_thread
@@ -65,5 +65,6 @@ def client(num_threads):
   sum_thread.join()
   (sum_count, sum_correct_count) = sum_thread.result
   
-  
+if __name__ == '__main__':
+    main()
     
