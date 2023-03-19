@@ -19,7 +19,6 @@ ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS["READ_COMMITTED"]
 
 def print_experiment_settings():
   print("------------ EXPERIMENT SETTINGS ------------")
-  print("Number of Rows In Data: ", NUM_OF_ROWS_IN_DATA)
   print("Number of Swap Transactions: ", NUM_OF_SWAP_TRANSACTION)
   print("Isolation Level: ", ISOLATION_LEVEL)
   print("---------------------------------------------")
