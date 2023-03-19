@@ -15,12 +15,14 @@ LIBRARY_ISOLATION_LEVELS = {
   "REPEATABLE_READ": extensions.ISOLATION_LEVEL_REPEATABLE_READ,
   "SERIALIZABLE": extensions.ISOLATION_LEVEL_SERIALIZABLE,
 }
-ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS["READ_COMMITTED"]
+# Must be a key from LIBRARY_ISOLATION_LEVELS
+ISOLATION_LEVEL_STRING = "READ_COMMITTED"
+ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS[ISOLATION_LEVEL_STRING]
 
 def print_experiment_settings():
   print("------------ EXPERIMENT SETTINGS ------------")
   print("Number of Swap Transactions: ", NUM_OF_SWAP_TRANSACTION)
-  print("Isolation Level: ", ISOLATION_LEVEL)
+  print("Isolation Level: ", ISOLATION_LEVEL_STRING)
   print("---------------------------------------------")
 
 
@@ -74,9 +76,9 @@ def main():
     swap_thread = Thread(target=execute_swap_client)
     swap_threads.append(swap_thread)
 
+  sum_thread.start()
   # start timer
   stats.start_timer()
-  sum_thread.start()
   for i in range(NUM_THREADS):
     swap_threads[i].start()
   for i in range(NUM_THREADS):
