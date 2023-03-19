@@ -18,9 +18,20 @@ def sum_b(isolation_level):
     conn = get_conn()
     conn.set_isolation_level(isolation_level)
     cur = conn.cursor()
-    cur.execute(f"SELECT SUM(b) FROM {table_name}")
-    row = cur.fetchone()
-    result = row[0]
+    result = 0 # If serialization error, return 0 to cause wrong result instead of crashing the script
+
+    try:
+        cur.execute(f"SELECT SUM(b) FROM {table_name}")
+        row = cur.fetchone()
+        result = row[0]
+
+    except psycopg2.errors.SerializationFailure as error:
+        print('sum_b(): ***psycopg2.errors.SerializationFailure***')
+
+    except Exception as error:
+        print(error)
+        print('\n')
+
     cur.close()
     conn.close()
     return result
@@ -44,14 +55,11 @@ def swap_b(isolation_level, first_id):
         conn.commit()
 
     except psycopg2.errors.SerializationFailure as error:
-        time.sleep(1)
-        cur.execute(f"UPDATE {table_name} SET b = b - 100 WHERE a = {first_id}")
-        cur.execute(f"UPDATE {table_name} SET b = b + 100 where a = {second_id}")
+        print('swap_b(): ***psycopg2.errors.SerializationFailure***')
 
-        conn.commit()
-
-    except (Exception, psycopg2.Error) as error:
-        raise error
+    except Exception as error:
+        print(error)
+        print('\n')
 
     cur.close()
     conn.close()
