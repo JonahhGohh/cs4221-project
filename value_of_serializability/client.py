@@ -93,8 +93,3 @@ def main():
 if __name__ == '__main__':
     main()
     
-
-def process_swap_thread(thread):
-  time
-  thread.start()
-
