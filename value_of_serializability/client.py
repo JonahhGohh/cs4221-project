@@ -1,38 +1,27 @@
 from db import *
 from threading import Thread, Lock
-from random import randint
 from psycopg2 import extensions
 
 NUM_THREADS = 20
 NUM_OF_ROWS_IN_DATA = 100000
-id_counter = 1
-END_FLAG = False
 CONSTANT_SUM = 500000500000
 NUM_OF_SWAP_TRANSACTION = 1000
+id_counter = 1
+end_flag = False
 id_counter_lock = Lock()
-end_flag_lock = Lock()
 
 LIBRARY_ISOLATION_LEVELS = {
   "READ_COMMITTED": extensions.ISOLATION_LEVEL_READ_COMMITTED,
   "REPEATABLE_READ": extensions.ISOLATION_LEVEL_REPEATABLE_READ,
   "SERIALIZABLE": extensions.ISOLATION_LEVEL_SERIALIZABLE,
 }
-ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS["SERIALIZABLE"]
+ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS["READ_COMMITTED"]
 
 def execute_sum_client(results):
-  global END_FLAG
-  global ISOLATION_LEVEL
-  global CONSTANT_SUM
-  global end_flag_lock
 
   sum_count = 0
   sum_correct_count = 0
-  while True:
-    end_flag_lock.acquire()
-    if END_FLAG:
-      end_flag_lock.release()
-      break
-    end_flag_lock.release()
+  while not end_flag:
     sum_count += 1
     result = sum_b(ISOLATION_LEVEL)
     if result == CONSTANT_SUM:
@@ -41,28 +30,20 @@ def execute_sum_client(results):
   results.append([sum_count, sum_correct_count])
     
 def execute_swap_client():
-  global NUM_OF_SWAP_TRANSACTION
-  global ISOLATION_LEVEL
-  global END_FLAG
   global id_counter
-  global id_counter_lock
-  global end_flag_lock
 
   while True:
     id_counter_lock.acquire()
     if id_counter >= NUM_OF_SWAP_TRANSACTION * 2:
       id_counter_lock.release()
       break
+    curr_id_counter = id_counter
     id_counter += 2
     id_counter_lock.release()
-    swap_b(ISOLATION_LEVEL, id_counter)
-  end_flag_lock.acquire()
-  if END_FLAG == False:
-    END_FLAG = True
-  end_flag_lock.release()
+    swap_b(ISOLATION_LEVEL, curr_id_counter)
     
 def main():
-  global NUM_THREADS
+  global end_flag
   
   # setup db
   setup_db()
@@ -84,6 +65,7 @@ def main():
     swap_threads[i].start()
   for i in range(NUM_THREADS):
     swap_threads[i].join()
+  end_flag = True
   # end timer
   sum_thread.join()
   (sum_count, sum_correct_count) = results[0]
