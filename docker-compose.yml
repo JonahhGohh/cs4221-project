@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  db:
+    build: ./database/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 5
+  value_of_serializability:
+    build: ./value_of_serializability_script/
+    depends_on:
+      db:
+        condition: service_healthy
