@@ -1,4 +1,5 @@
 import psycopg2
+import time
 
 # To setup, follow README.md steps
 
@@ -31,16 +32,27 @@ def swap_b(isolation_level, first_id):
     conn.set_isolation_level(isolation_level)
     cur = conn.cursor()
 
-    cur.execute(f"UPDATE {table_name} SET b = b - 100 WHERE a = {first_id}")
-    cur.execute(f"UPDATE {table_name} SET b = b + 100 where a = {second_id}")
+    try:
+        cur.execute(f"UPDATE {table_name} SET b = b - 100 WHERE a = {first_id}")
+        cur.execute(f"UPDATE {table_name} SET b = b + 100 where a = {second_id}")
 
-    # cur.execute(f"SELECT b FROM {table_name} WHERE a = {first_id} OR a = {second_id} ORDER BY a")
-    # rows = [row[0] for row in cur.fetchall()]
-    # first_b, second_b = rows
-    # cur.execute(f"UPDATE {table_name} SET b = {second_b} WHERE a = {first_id}")
-    # cur.execute(f"UPDATE {table_name} SET b = {first_b} WHERE a = {second_id}")
+        # cur.execute(f"SELECT b FROM {table_name} WHERE a = {first_id} OR a = {second_id} ORDER BY a")
+        # rows = [row[0] for row in cur.fetchall()]
+        # first_b, second_b = rows
+        # cur.execute(f"UPDATE {table_name} SET b = {second_b} WHERE a = {first_id}")
+        # cur.execute(f"UPDATE {table_name} SET b = {first_b} WHERE a = {second_id}")
+        conn.commit()
 
-    conn.commit()
+    except psycopg2.errors.SerializationFailure as error:
+        time.sleep(1)
+        cur.execute(f"UPDATE {table_name} SET b = b - 100 WHERE a = {first_id}")
+        cur.execute(f"UPDATE {table_name} SET b = b + 100 where a = {second_id}")
+
+        conn.commit()
+
+    except (Exception, psycopg2.Error) as error:
+        raise error
+
     cur.close()
     conn.close()
 
