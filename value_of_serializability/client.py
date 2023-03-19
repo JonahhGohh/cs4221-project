@@ -18,7 +18,6 @@ LIBRARY_ISOLATION_LEVELS = {
 ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS["READ_COMMITTED"]
 
 def execute_sum_client(results):
-  global end_flag
 
   sum_count = 0
   sum_correct_count = 0
@@ -44,7 +43,6 @@ def execute_swap_client():
     swap_b(ISOLATION_LEVEL, curr_id_counter)
     
 def main():
-  global NUM_THREADS
   global end_flag
   
   # setup db
