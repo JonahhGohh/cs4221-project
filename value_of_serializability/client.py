@@ -5,7 +5,7 @@ from psycopg2 import extensions
 
 NUM_THREADS = 20
 CONSTANT_SUM = 500000500000
-NUM_OF_SWAP_TRANSACTION = 20000
+NUM_OF_SWAP_TRANSACTION = 1000
 id_counter = 1
 end_flag = False
 id_counter_lock = Lock()
@@ -23,6 +23,7 @@ ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS[ISOLATION_LEVEL_STRING]
 def print_experiment_settings():
   print("------------ EXPERIMENT SETTINGS ------------")
   print("Number of Swap Transactions: ", NUM_OF_SWAP_TRANSACTION)
+  print("Number of Threads: ", NUM_THREADS)
   print("Isolation Level: ", ISOLATION_LEVEL_STRING)
   print("---------------------------------------------")
 
@@ -90,6 +91,7 @@ def main():
   sum_thread.join()
   (sum_count, sum_correct_count) = results[0]
 
+  stats.set_num_of_swap_transactions(NUM_OF_SWAP_TRANSACTION)
   stats.set_sum_count(sum_count)
   stats.set_sum_correct_count(sum_correct_count)
   stats.print_stats()  
