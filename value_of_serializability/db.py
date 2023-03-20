@@ -31,10 +31,8 @@ def sum_b(isolation_level):
             cur.close()
             break
 
-        except psycopg2.errors.SerializationFailure as error:
-            print('sum_b(): ***psycopg2.errors.SerializationFailure***')
-
         except Exception as error:
+            print('sum_b() ERROR')
             retries += 1
             print(error)
             print('\n')
@@ -69,10 +67,8 @@ def swap_b(isolation_level, first_id):
             cur.close()
             break
 
-        except psycopg2.errors.SerializationFailure as error:
-            print('swap_b(): ***psycopg2.errors.SerializationFailure***')
-
         except Exception as error:
+            print('swap_b() ERROR')
             retries += 1 
             print(error)
             print('\n')
