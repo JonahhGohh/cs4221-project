@@ -90,6 +90,7 @@ def main():
   sum_thread.join()
   (sum_count, sum_correct_count) = results[0]
 
+  stats.set_num_of_swap_transactions(NUM_OF_SWAP_TRANSACTION)
   stats.set_sum_count(sum_count)
   stats.set_sum_correct_count(sum_correct_count)
   stats.print_stats()  
