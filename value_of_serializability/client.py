@@ -15,6 +15,17 @@ def print_experiment_settings(num_of_swap_transactions, num_threads, isolation_l
   print("Isolation Level: ", isolation_level)
   print("---------------------------------------------")
 
+# Must be a key from LIBRARY_ISOLATION_LEVELS
+ISOLATION_LEVEL_STRING = "READ_COMMITTED"
+
+LIBRARY_ISOLATION_LEVELS = {
+  "READ_COMMITTED": extensions.ISOLATION_LEVEL_READ_COMMITTED,
+  "REPEATABLE_READ": extensions.ISOLATION_LEVEL_REPEATABLE_READ,
+  "SERIALIZABLE": extensions.ISOLATION_LEVEL_SERIALIZABLE,
+}
+ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS[ISOLATION_LEVEL_STRING]
+
+
 def execute_sum_client(isolation_level, results):
   sum_count = 0
   sum_correct_count = 0
@@ -67,9 +78,9 @@ def run_experiment(num_of_swap_transactions, num_threads, isolation_level):
     swap_thread = Thread(target=execute_swap_client, args=(isolation_level, num_of_swap_transactions))
     swap_threads.append(swap_thread)
 
+  sum_thread.start()
   # start timer
   stats.start_timer()
-  sum_thread.start()
   for i in range(num_threads):
     swap_threads[i].start()
   for i in range(num_threads):
@@ -80,6 +91,7 @@ def run_experiment(num_of_swap_transactions, num_threads, isolation_level):
   sum_thread.join()
   (sum_count, sum_correct_count) = results[0]
 
+  stats.set_num_of_swap_transactions(num_of_swap_transactions)
   stats.set_sum_count(sum_count)
   stats.set_sum_correct_count(sum_correct_count)
   stats.print_stats()  

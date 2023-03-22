@@ -7,6 +7,7 @@ class Statistics:
         self.end_time = -1
         self.sum_count = -1
         self.sum_correct_count = -1
+        self.num_of_swap_transactions = -1
 
     def start_timer(self):
         self.start_time = time.perf_counter()
@@ -26,6 +27,9 @@ class Statistics:
     def set_sum_correct_count(self, sum_correct_count):
         self.sum_correct_count = sum_correct_count
 
+    def set_num_of_swap_transactions(self, num_of_swap_transactions):
+        self.num_of_swap_transactions = num_of_swap_transactions
+
     def get_ratio_correct_count(self):
         if self.sum_correct_count == -1 or self.sum_count == -1:
             return -1
@@ -33,10 +37,10 @@ class Statistics:
             return self.sum_correct_count/self.sum_count
 
     def get_throughput(self):
-        if self.start_time == -1 or self.end_time == -1 or self.sum_count == -1:
+        if self.num_of_swap_transactions == -1:
             return -1
         else:
-            return self.sum_count/self.get_response_time()
+            return self.num_of_swap_transactions/self.get_response_time()
     
     def print_stats(self):
         print("---------------- STATISTICS -----------------")
