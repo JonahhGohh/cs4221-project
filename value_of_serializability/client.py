@@ -8,23 +8,18 @@ id_counter = 1
 end_flag = False
 id_counter_lock = Lock()
 
+LIBRARY_ISOLATION_LEVELS = {
+  extensions.ISOLATION_LEVEL_READ_COMMITTED : "READ_COMMITTED",
+  extensions.ISOLATION_LEVEL_REPEATABLE_READ : "REPEATABLE_READ",
+  extensions.ISOLATION_LEVEL_SERIALIZABLE : "SERIALIZABLE"
+}
+
 def print_experiment_settings(num_of_swap_transactions, num_threads, isolation_level):
   print("------------ EXPERIMENT SETTINGS ------------")
   print("Number of Swap Transactions: ", num_of_swap_transactions)
   print("Number of Threads: ", num_threads)
-  print("Isolation Level: ", isolation_level)
+  print("Isolation Level: ", LIBRARY_ISOLATION_LEVELS[isolation_level])
   print("---------------------------------------------")
-
-# Must be a key from LIBRARY_ISOLATION_LEVELS
-ISOLATION_LEVEL_STRING = "READ_COMMITTED"
-
-LIBRARY_ISOLATION_LEVELS = {
-  "READ_COMMITTED": extensions.ISOLATION_LEVEL_READ_COMMITTED,
-  "REPEATABLE_READ": extensions.ISOLATION_LEVEL_REPEATABLE_READ,
-  "SERIALIZABLE": extensions.ISOLATION_LEVEL_SERIALIZABLE,
-}
-ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS[ISOLATION_LEVEL_STRING]
-
 
 def execute_sum_client(isolation_level, results):
   sum_count = 0
@@ -38,8 +33,6 @@ def execute_sum_client(isolation_level, results):
     if result == CONSTANT_SUM:
       sum_correct_count += 1
 
-  print(sum_correct_count)
-  print(sum_count)
   results.append([sum_count, sum_correct_count])
     
 def execute_swap_client(isolation_level, num_of_swap_transactions):
@@ -83,6 +76,7 @@ def run_experiment(num_of_swap_transactions, num_threads, isolation_level):
   stats.start_timer()
   for i in range(num_threads):
     swap_threads[i].start()
+
   for i in range(num_threads):
     swap_threads[i].join()
   end_flag = True
@@ -90,13 +84,19 @@ def run_experiment(num_of_swap_transactions, num_threads, isolation_level):
   stats.end_timer()
   sum_thread.join()
   (sum_count, sum_correct_count) = results[0]
-
   stats.set_num_of_swap_transactions(num_of_swap_transactions)
   stats.set_sum_count(sum_count)
   stats.set_sum_correct_count(sum_correct_count)
   stats.print_stats()  
+  reset()
 
+
+
+def reset():
+  global id_counter, end_flag
+  id_counter = 1
+  end_flag = False
 
 # if __name__ == '__main__':
-#     run_experiment(1000, 20, extensions.ISOLATION_LEVEL_SERIALIZABLE)
+#     run_experiment(1000, 20, extensions.ISOLATION_LEVEL_REPEATABLE_READ)
     
