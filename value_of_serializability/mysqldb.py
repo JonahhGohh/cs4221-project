@@ -96,6 +96,8 @@ def setup_db():
         conn.commit()
         cur.callproc('seedDB')
         conn.commit()
+        cur.execute('SET GLOBAL innodb_buffer_pool_size=402653184 1073741824;')
+        conn.commit()
     # except psycopg2.errors.DuplicateTable:
     #     print('Experiment table already created, skipping...')
     except Exception as e:
