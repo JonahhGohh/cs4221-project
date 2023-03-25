@@ -5,7 +5,7 @@ import time
 
 # Connecting to postgresql in container
 db_config = {
-    "database": "sql",
+    "database": "experiments",
     "user": "user",
     "host": "db",
     "password": "1234",
@@ -80,7 +80,10 @@ def swap_b(isolation_level, first_id):
 
 def setup_db():
     conn = get_conn()
-    # cur = conn.cursor()
+    cur = conn.cursor()
+    cur.execute("SHOW DATABASES")
+    for x in cur:
+        print(x)
     # schema_file = get_file("schema.sql")
     # seed_file = get_file("seed.sql")
 
@@ -96,19 +99,17 @@ def setup_db():
 
     # conn.commit()
     # print('finished seeding')
-    # cur.close()
-    # conn.close()
+    cur.close()
+    conn.close()
 
 
 def get_conn():
     try:
-        with connect(
-            **db_config
-        ) as connection:
-            print(connection)
+        conn = connect(**db_config)
+        print(conn)
+        return conn
     except Error as e:
         print(e)
-    return connection
 
 
 def get_file(filename):

@@ -7,11 +7,11 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_PASSWORD: 1234
-      MYSQL_DATABASE: "sql"
+      MYSQL_DATABASE: "experiments"
       MYSQL_USER: "user"
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "127.0.0.1"]
-      interval: 5s
+      interval: 3s
       timeout: 5s
       retries: 5
   value_of_serializability:
