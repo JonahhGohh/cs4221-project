@@ -19,6 +19,7 @@ class Statistics:
         if self.start_time == -1 or self.end_time == -1:
             return -1
         else:
+            print('response time', self.end_time - self.start_time)
             return self.end_time - self.start_time
 
     def set_sum_count(self, sum_count):

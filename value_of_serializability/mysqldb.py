@@ -20,8 +20,9 @@ def sum_b(isolation_level):
 
     retries = 0
     while True:
-        conn.set_isolation_level(isolation_level)
+        # conn.set_isolation_level(isolation_level)
         cur = conn.cursor()
+        cur.execute("SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED")
         if retries >= 10:
             break
         try:
@@ -49,8 +50,9 @@ def swap_b(isolation_level, first_id):
 
     retries = 0
     while True:
-        conn.set_isolation_level(isolation_level)
+        # conn.set_isolation_level(isolation_level)
         cur = conn.cursor()
+        cur.execute("SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED")
         if retries >= 10:
             break
         try:
@@ -104,7 +106,6 @@ def setup_db():
 def get_conn():
     try:
         conn = connect(**db_config)
-        print(conn)
         return conn
     except Error as e:
         print(e)
@@ -119,11 +120,5 @@ def get_file(filename):
 
 
 
-def main():
-    setup_db()
-
-if __name__ == '__main__':
-    main()
-    
 
 
