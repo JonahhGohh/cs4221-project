@@ -3,8 +3,8 @@ from mysqldb import *
 from threading import Thread, Lock
 from psycopg2 import extensions
 
-NUM_THREADS = 40
-CONSTANT_SUM = 500000500000
+NUM_THREADS = 50
+CONSTANT_SUM = 50000005000000
 NUM_OF_SWAP_TRANSACTION = 20000
 id_counter = 1
 end_flag = False
