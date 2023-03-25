@@ -21,7 +21,7 @@ def sum_b(isolation_level):
     retries = 0
     while True:
         cur = conn.cursor()
-        cur.execute("SET TRANSACTION ISOLATION LEVEL READ COMMITTED")
+        cur.execute(f"SET SESSION TRANSACTION ISOLATION LEVEL {isolation_level}")
 
         cur.execute("SELECT @@session.tx_isolation")
         print('isolation level', cur.fetchall()[0])
@@ -54,7 +54,7 @@ def swap_b(isolation_level, first_id):
     retries = 0
     while True:
         cur = conn.cursor()
-        cur.execute("SET TRANSACTION ISOLATION LEVEL READ COMMITTED")
+        cur.execute(f"SET SESSION TRANSACTION ISOLATION LEVEL {isolation_level}")
         if retries >= 10:
             break
         try:

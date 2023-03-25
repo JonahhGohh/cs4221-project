@@ -10,15 +10,15 @@ id_counter = 1
 end_flag = False
 id_counter_lock = Lock()
 
-# Must be a key from LIBRARY_ISOLATION_LEVELS
-ISOLATION_LEVEL_STRING = "READ_COMMITTED"
+# Must be a level from https://dev.mysql.com/doc/refman/8.0/en/set-transaction.html
+ISOLATION_LEVEL_STRING = "READ COMMITTED"
 
 LIBRARY_ISOLATION_LEVELS = {
   "READ_COMMITTED": extensions.ISOLATION_LEVEL_READ_COMMITTED,
   "REPEATABLE_READ": extensions.ISOLATION_LEVEL_REPEATABLE_READ,
   "SERIALIZABLE": extensions.ISOLATION_LEVEL_SERIALIZABLE,
 }
-ISOLATION_LEVEL = LIBRARY_ISOLATION_LEVELS[ISOLATION_LEVEL_STRING]
+ISOLATION_LEVEL = ISOLATION_LEVEL_STRING
 
 def print_experiment_settings():
   print("------------ EXPERIMENT SETTINGS ------------")
