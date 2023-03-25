@@ -93,6 +93,7 @@ def setup_db():
         cur.execute(seed_file)
         conn.commit()
         cur.callproc('seedDB')
+        conn.commit()
     # except psycopg2.errors.DuplicateTable:
     #     print('Experiment table already created, skipping...')
     except Exception as e:

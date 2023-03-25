@@ -11,7 +11,7 @@ services:
       MYSQL_USER: "user"
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "127.0.0.1"]
-      interval: 3s
+      interval: 4s
       timeout: 5s
       retries: 5
   value_of_serializability:
