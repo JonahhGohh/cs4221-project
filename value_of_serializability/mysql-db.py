@@ -81,24 +81,22 @@ def swap_b(isolation_level, first_id):
 def setup_db():
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("SHOW DATABASES")
-    for x in cur:
-        print(x)
-    # schema_file = get_file("schema.sql")
-    # seed_file = get_file("seed.sql")
+    schema_file = get_file("mysql-schema.sql")
+    seed_file = get_file("mysql-seed.sql")
 
-    # try:
-    #     cur.execute(schema_file)
-    #     conn.commit()
-    #     print('executing seed file')
-    #     cur.execute(seed_file)
+    try:
+        cur.execute(schema_file)
+        conn.commit()
+        print('executing seed file')
+        cur.execute(seed_file)
+        conn.commit()
+        cur.callproc('seedDB')
     # except psycopg2.errors.DuplicateTable:
     #     print('Experiment table already created, skipping...')
-    # except Exception as e:
-    #     print('Error creating Experiment table', e)
+    except Exception as e:
+        print('Error creating Experiment table', e)
 
-    # conn.commit()
-    # print('finished seeding')
+    print('finished seeding')
     cur.close()
     conn.close()
 
