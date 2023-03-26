@@ -44,7 +44,7 @@ WITHDRAWAL_AMOUNT = 20
 # This should be kept constant across the different experiments
 # and should cause transactions to continue executing even after balance reach 0
 # to check if the experiment setup will result in overdeduction of balance due to concurrency issue
-NUM_OF_TRANSACTION = START_BALANCE / WITHDRAWAL_AMOUNT * 1.1 
+NUM_OF_TRANSACTION = START_BALANCE / WITHDRAWAL_AMOUNT * 1.1
 transaction_counter = 0
 transaction_counter_lock = Lock()
 
@@ -64,12 +64,11 @@ def execute_withdrawal_client():
             isolation_level, select_query_type, WITHDRAWAL_AMOUNT)
 
 
-
 def reset_global_parameters(experiment_parameters):
     global transaction_counter
     global isolation_level
     global select_query_type
-    
+
     transaction_counter = 0
     isolation_level = LIBRARY_ISOLATION_LEVELS[experiment_parameters["ISOLATION_LEVEL"]]
     select_query_type = SELECT_QUERY_TYPES[experiment_parameters["SELECT_QUERY_TYPE"]]
@@ -82,7 +81,8 @@ def run_experiments():
     for experiment_parameters in EXPERIMENT_SETUP:
         setup_db()
         stats = Statistics()
-        stats.set_experiment_parameters({**experiment_parameters, "NUM_THREADS": NUM_THREADS, "START_BALANCE": START_BALANCE, "WITHDRAWAL_AMOUNT": WITHDRAWAL_AMOUNT})
+        stats.set_experiment_parameters({**experiment_parameters, "NUM_THREADS": NUM_THREADS,
+                                        "START_BALANCE": START_BALANCE, "WITHDRAWAL_AMOUNT": WITHDRAWAL_AMOUNT})
         reset_global_parameters(experiment_parameters)
         reset_balance(START_BALANCE)
 
@@ -110,6 +110,7 @@ def run_experiments():
 
     return experiment_stats
 
+
 def print_experiment_stats(experiment_stats):
     for stats in experiment_stats:
         stats.print_experiment_setup()
@@ -119,7 +120,6 @@ def print_experiment_stats(experiment_stats):
 def main():
     experiment_stats = run_experiments()
     print_experiment_stats(experiment_stats)
-
 
 
 if __name__ == '__main__':
