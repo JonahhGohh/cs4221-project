@@ -9,6 +9,7 @@ class Statistics:
         self.end_time = -1
         self.num_of_transactions = -1
         self.end_balance = -1
+        self.transaction_retries = 0
 
     def start_timer(self):
         self.start_time = time.perf_counter()
@@ -30,6 +31,12 @@ class Statistics:
 
     def get_end_balance(self):
         return self.end_balance
+    
+    def set_transaction_retries(self, retries):
+        self.transaction_retries = retries
+    
+    def get_transaction_retries(self):
+        return self.transaction_retries
 
     def get_throughput(self):
         if self.num_of_transactions == -1:
@@ -65,5 +72,8 @@ class Statistics:
         throughput = self.get_throughput()
         print("\nResponse Time: ", response_time if response_time != -1 else "INVALID")
         print("Throughput: ", throughput if throughput != -1 else "INVALID")
+
+        print("Number of Transactions: ", self.experiment_parameters["NUM_OF_TRANSACTION"])
+        print("\nNumber of Transaction Retries: ", self.get_transaction_retries())
 
         print("---------------------------------------------")

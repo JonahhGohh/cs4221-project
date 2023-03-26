@@ -22,8 +22,7 @@ def withdrawal_transaction(isolation_level, select_query_type, withdrawal_amount
         conn.set_isolation_level(isolation_level)
         cur = conn.cursor()
 
-        # if retries >= 10:
-        #     break
+        # infinite retries
         try:
             cur.execute(
                 f"SELECT balance FROM {table_name} WHERE id = 1 {select_query_type}")

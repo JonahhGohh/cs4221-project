@@ -47,10 +47,13 @@ WITHDRAWAL_AMOUNT = 20
 NUM_OF_TRANSACTION = START_BALANCE / WITHDRAWAL_AMOUNT * 1.1
 transaction_counter = 0
 transaction_counter_lock = Lock()
+transaction_retries = 0
+transaction_retries_lock = Lock()
 
 
 def execute_withdrawal_client():
     global transaction_counter
+    global transaction_retries
 
     while True:
         transaction_counter_lock.acquire()
@@ -60,16 +63,22 @@ def execute_withdrawal_client():
 
         transaction_counter += 1
         transaction_counter_lock.release()
-        withdrawal_transaction(
+        retries = withdrawal_transaction(
             isolation_level, select_query_type, WITHDRAWAL_AMOUNT)
+        if retries > 0:
+            transaction_retries_lock.acquire()
+            transaction_retries += retries
+            transaction_retries_lock.release()
 
 
 def reset_global_parameters(experiment_parameters):
     global transaction_counter
+    global transaction_retries
     global isolation_level
     global select_query_type
 
     transaction_counter = 0
+    transaction_retries = 0
     isolation_level = LIBRARY_ISOLATION_LEVELS[experiment_parameters["ISOLATION_LEVEL"]]
     select_query_type = SELECT_QUERY_TYPES[experiment_parameters["SELECT_QUERY_TYPE"]]
 
@@ -105,6 +114,7 @@ def run_experiments():
 
         # Get end balance to check correctness
         stats.set_end_balance(find_end_balance())
+        stats.set_transaction_retries(transaction_retries)
 
         experiment_stats.append(stats)
         print('Finished an experiment...')
