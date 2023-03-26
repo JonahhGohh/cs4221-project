@@ -78,10 +78,11 @@ def run_experiments():
     experiment_stats = []
 
     print('Running all experiments... Please Wait...')
+    print('You may see many serialization errors from dbms if isolation level = REPEATABLE_READ or SERIALIZABLE, this is normal, do not be alarmed')
     for experiment_parameters in EXPERIMENT_SETUP:
         setup_db()
         stats = Statistics()
-        stats.set_experiment_parameters({**experiment_parameters, "NUM_THREADS": NUM_THREADS,
+        stats.set_experiment_parameters({**experiment_parameters, "NUM_THREADS": NUM_THREADS, "NUM_OF_TRANSACTION": NUM_OF_TRANSACTION,
                                         "START_BALANCE": START_BALANCE, "WITHDRAWAL_AMOUNT": WITHDRAWAL_AMOUNT})
         reset_global_parameters(experiment_parameters)
         reset_balance(START_BALANCE)

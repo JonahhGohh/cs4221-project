@@ -28,7 +28,7 @@ class Statistics:
     def set_end_balance(self, end_balance):
         self.end_balance = end_balance
 
-    def get_end_balance(self, end_balance):
+    def get_end_balance(self):
         return self.end_balance
 
     def get_throughput(self):
@@ -39,6 +39,7 @@ class Statistics:
 
     def set_experiment_parameters(self, experiment_parameters):
         self.experiment_parameters = experiment_parameters
+        self.set_num_of_transactions(experiment_parameters["NUM_OF_TRANSACTION"])
 
     def print_experiment_setup(self):
         print("------------ EXPERIMENT SETTINGS ------------")
@@ -62,7 +63,7 @@ class Statistics:
 
         response_time = self.get_response_time()
         throughput = self.get_throughput()
-        print("Response Time: ", response_time if response_time != -1 else "INVALID")
+        print("\nResponse Time: ", response_time if response_time != -1 else "INVALID")
         print("Throughput: ", throughput if throughput != -1 else "INVALID")
 
         print("---------------------------------------------")
