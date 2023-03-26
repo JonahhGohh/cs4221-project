@@ -70,10 +70,10 @@ class Statistics:
 
         response_time = self.get_response_time()
         throughput = self.get_throughput()
-        print("\nResponse Time: ", response_time if response_time != -1 else "INVALID")
-        print("Throughput: ", throughput if throughput != -1 else "INVALID")
+        print("\nResponse Time: ", round(response_time,2) if response_time != -1 else "INVALID")
+        print("Throughput: ", round(throughput,2) if throughput != -1 else "INVALID")
 
-        print("Number of Transactions: ", self.experiment_parameters["NUM_OF_TRANSACTION"])
-        print("\nNumber of Transaction Retries: ", self.get_transaction_retries())
+        print("\nNumber of Transactions: ", int(self.experiment_parameters["NUM_OF_TRANSACTION"]) if "NUM_OF_TRANSACTION" in self.experiment_parameters else "INVALID")
+        print("Number of Transaction Retries: ", self.get_transaction_retries())
 
         print("---------------------------------------------")
