@@ -14,7 +14,35 @@ db_config = {
 
 table_name = "serializability_1"
 
-def sum_b(isolation_level):
+def count_b(isolation_level, table_name = "serializability_1"):
+    conn = get_conn()
+    result = 0 # If serialization error, return 0 to cause wrong result instead of crashing the script
+
+    retries = 0
+    while True:
+        conn.set_isolation_level(isolation_level)
+        cur = conn.cursor()
+        if retries >= 10:
+            break
+        try:
+            cur.execute(f"SELECT COUNT(*) FROM {table_name}")
+            row = cur.fetchone()
+            result = row[0]
+            cur.close()
+            break
+
+        except Exception as error:
+            print('count_b() ERROR')
+            retries += 1
+            print(error)
+            print('\n')
+            cur.close()
+            conn.rollback()
+    
+    conn.close()
+    return result
+
+def sum_b(isolation_level, table_name = "serializability_1"):
     conn = get_conn()
     result = 0 # If serialization error, return 0 to cause wrong result instead of crashing the script
 
@@ -77,6 +105,67 @@ def swap_b(isolation_level, first_id):
 
     conn.close()
 
+def sum_insert(isolation_level, insert_id, table_name = 'serializability_2'):
+    conn = get_conn()
+    result = 0
+
+    retries = 0
+    while True:
+        conn.set_isolation_level(isolation_level)
+        cur = conn.cursor()
+        if retries >= 10:
+            break
+        try:
+            cur.execute(f'SELECT SUM(b) FROM {table_name}')
+            row = cur.fetchone()
+            result = row[0]
+            cur.execute(f'INSERT INTO {table_name} VALUES ({insert_id}, {result})')
+            conn.commit()
+            cur.close()
+            break
+
+        except Exception as error:
+            print('sum_insert() ERROR')
+            retries += 1 
+            print(error)
+            print('\n')
+            cur.close()
+            conn.rollback()
+        
+        conn.close()
+        return result
+
+def select_update(isolation_level, update_id):
+    conn = get_conn()
+    result = 0
+
+    retries = 0
+    while True:
+        conn.set_isolation_level(isolation_level)
+        cur = conn.cursor()
+        if retries >= 10:
+            break
+        try:
+            # cur.execute(f"LOCK TABLE {table_name} IN SHARE ROW EXCLUSIVE MODE")
+            # cur.execute(f"SELECT b FROM {table_name} WHERE a = {update_id} FOR UPDATE")
+            cur.execute(f"SELECT b FROM {table_name} WHERE a = {update_id}")
+            row = cur.fetchone()
+            result = row[0] + 1
+            cur.execute(f"UPDATE {table_name} SET b = {result} WHERE a = {update_id}")
+            conn.commit()
+            cur.close()
+            break
+
+        except Exception as error:
+            print('select_update() ERROR')
+            retries += 1
+            print(error)
+            print('\n')
+            cur.close()
+            conn.rollback()
+        
+        conn.close()
+        return result
 
 def setup_db():
     conn = get_conn()
