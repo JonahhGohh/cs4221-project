@@ -1,123 +1,63 @@
-from threading import Thread, Lock
-from psycopg2 import extensions
 from db import *
-from stats import Statistics
+from stats import *
 
-
-EXPERIMENT_SETUP = [
-    {
-        # Must be a key from LIBRARY_ISOLATION_LEVELS
-        "ISOLATION_LEVEL": "READ_COMMITTED",
-        # Must be a key from SELECT_QUERY_TYPES
-        "SELECT_QUERY_TYPE": "NORMAL_SELECT",
-    },
-    {
-        "ISOLATION_LEVEL": "READ_COMMITTED",
-        "SELECT_QUERY_TYPE": "SELECT_FOR_UPDATE"
-    },
-    {
-        "ISOLATION_LEVEL": "REPEATABLE_READ",
-        "SELECT_QUERY_TYPE": "NORMAL_SELECT"
-    },
-    {
-        "ISOLATION_LEVEL": "SERIALIZABLE",
-        "SELECT_QUERY_TYPE": "NORMAL_SELECT"
-    },
-]
-
-SELECT_QUERY_TYPES = {
-    "NORMAL_SELECT": "",
-    "SELECT_FOR_UPDATE": " FOR UPDATE"
-}
-select_query_type = None
-
-LIBRARY_ISOLATION_LEVELS = {
-    "READ_COMMITTED": extensions.ISOLATION_LEVEL_READ_COMMITTED,
-    "REPEATABLE_READ": extensions.ISOLATION_LEVEL_REPEATABLE_READ,
-    "SERIALIZABLE": extensions.ISOLATION_LEVEL_SERIALIZABLE,
-}
-isolation_level = None
-
-NUM_THREADS = 10
-START_BALANCE = 200000
-WITHDRAWAL_AMOUNT = 20
-# This should be kept constant across the different experiments
-# and should cause transactions to continue executing even after balance reach 0
-# to check if the experiment setup will result in overdeduction of balance due to concurrency issue
-NUM_OF_TRANSACTION = START_BALANCE / WITHDRAWAL_AMOUNT * 1.1
-transaction_counter = 0
-transaction_counter_lock = Lock()
-transaction_retries = 0
-transaction_retries_lock = Lock()
-
-
-def execute_withdrawal_client():
-    global transaction_counter
-    global transaction_retries
-
-    while True:
-        transaction_counter_lock.acquire()
-        if transaction_counter >= NUM_OF_TRANSACTION:
-            transaction_counter_lock.release()
-            break
-
-        transaction_counter += 1
-        transaction_counter_lock.release()
-        retries = withdrawal_transaction(
-            isolation_level, select_query_type, WITHDRAWAL_AMOUNT)
-        if retries > 0:
-            transaction_retries_lock.acquire()
-            transaction_retries += retries
-            transaction_retries_lock.release()
-
-
-def reset_global_parameters(experiment_parameters):
-    global transaction_counter
-    global transaction_retries
-    global isolation_level
-    global select_query_type
-
-    transaction_counter = 0
-    transaction_retries = 0
-    isolation_level = LIBRARY_ISOLATION_LEVELS[experiment_parameters["ISOLATION_LEVEL"]]
-    select_query_type = SELECT_QUERY_TYPES[experiment_parameters["SELECT_QUERY_TYPE"]]
-
+NUM_OF_QUERIES = 100
+NUM_OF_INSERT = 100
+NUM_OF_EXPERIMENTS = 10
+LAST_ID_OF_SEED = 1000000
 
 def run_experiments():
     experiment_stats = []
 
-    print('Running all experiments... Please Wait...')
-    print('You may see many serialization errors from dbms if isolation level = REPEATABLE_READ or SERIALIZABLE, this is normal, do not be alarmed')
-    for experiment_parameters in EXPERIMENT_SETUP:
+    print('Running all experiments! Please Wait!')
+    # Test non index query
+    non_index_query_stats = Statistics(False, True)
+    for i in range(NUM_OF_EXPERIMENTS):
         setup_db()
-        stats = Statistics()
-        stats.set_experiment_parameters({**experiment_parameters, "NUM_THREADS": NUM_THREADS, "NUM_OF_TRANSACTION": NUM_OF_TRANSACTION,
-                                        "START_BALANCE": START_BALANCE, "WITHDRAWAL_AMOUNT": WITHDRAWAL_AMOUNT})
-        reset_global_parameters(experiment_parameters)
-        reset_balance(START_BALANCE)
-
-        withdrawal_threads = list()
-        for i in range(NUM_THREADS):
-            withdrawal_thread = Thread(target=execute_withdrawal_client)
-            withdrawal_threads.append(withdrawal_thread)
-
-        stats.start_timer()
-
-        # Concurrently execute transactions
-        for i in range(NUM_THREADS):
-            withdrawal_threads[i].start()
-
-        for i in range(NUM_THREADS):
-            withdrawal_threads[i].join()
-
-        stats.end_timer()
-
-        # Get end balance to check correctness
-        stats.set_end_balance(find_end_balance())
-        stats.set_transaction_retries(transaction_retries)
-
-        experiment_stats.append(stats)
-        print('Finished an experiment...')
+        non_index_query_timer = Timer()
+        non_index_query_timer.start_timer()
+        query_age_range(NUM_OF_QUERIES)
+        non_index_query_timer.end_timer()
+        non_index_query_stats.add_time(non_index_query_timer.get_response_time())
+    experiment_stats.append(non_index_query_stats)
+    print("non index query experiment completed!")
+    # Test non index insert
+    non_index_insert_stats = Statistics(False, False)
+    for i in range(NUM_OF_EXPERIMENTS):
+        setup_db()
+        non_index_insert_timer = Timer()
+        non_index_insert_timer.start_timer()
+        insert_new_rows(NUM_OF_INSERT, LAST_ID_OF_SEED)
+        non_index_insert_timer.end_timer()
+        non_index_insert_stats.add_time(non_index_insert_timer.get_response_time())
+    experiment_stats.append(non_index_insert_stats)
+    print("non index insert experiment completed!")
+    
+    # Test index query
+    index_query_stats = Statistics(True, True)
+    for i in range(NUM_OF_EXPERIMENTS):
+        setup_db(True)
+        index_query_timer = Timer()
+        index_query_timer.start_timer()
+        query_age_range(NUM_OF_QUERIES)
+        index_query_timer.end_timer()
+        index_query_stats.add_time(index_query_timer.get_response_time())
+    experiment_stats.append(index_query_stats)
+    print("index query experiment completed!")
+    
+    # Test index insert
+    index_insert_stats = Statistics(True, False)
+    for i in range(NUM_OF_EXPERIMENTS):
+        setup_db(True)
+        index_insert_timer = Timer()
+        index_insert_timer.start_timer()
+        insert_new_rows(NUM_OF_INSERT, LAST_ID_OF_SEED)
+        index_insert_timer.end_timer()
+        index_insert_stats.add_time(index_insert_timer.get_response_time())
+    experiment_stats.append(index_insert_stats)
+    print("index insert experiment completed!")
+    
+    print('Finished experiments...')
 
     return experiment_stats
 
@@ -125,6 +65,7 @@ def run_experiments():
 def print_experiment_stats(experiment_stats):
     for stats in experiment_stats:
         stats.print_experiment_setup()
+        stats.compute_statistics()
         stats.print_results()
 
 

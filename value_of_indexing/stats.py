@@ -1,79 +1,88 @@
 import time
 
-
-class Statistics:
-
+class Timer:
     def __init__(self):
-        self.experiment_parameters = {}
         self.start_time = -1
         self.end_time = -1
-        self.num_of_transactions = -1
-        self.end_balance = -1
-        self.transaction_retries = 0
-
+    
     def start_timer(self):
         self.start_time = time.perf_counter()
-
+    
     def end_timer(self):
         self.end_time = time.perf_counter()
+        
+    def get_response_time(self) -> float:
+        return self.end_time - self.start_time
 
-    def get_response_time(self):
-        if self.start_time == -1 or self.end_time == -1:
-            return -1
-        else:
-            return self.end_time - self.start_time
+class Statistics:
+    def __init__(self, is_index_type: bool, is_query_type: bool):
+        self.experiment_timings = list()
+        self.total_timing = -1
+        self.mean_timing = -1
+        self.median_timing = -1
+        self.is_index_type = is_index_type
+        self.is_query_type = is_query_type
 
-    def set_num_of_transactions(self, num_of_transactions):
-        self.num_of_transactions = num_of_transactions
+    def add_time(self, experiment_time: float):
+        self.experiment_timings.append(experiment_time)
 
-    def set_end_balance(self, end_balance):
-        self.end_balance = end_balance
-
-    def get_end_balance(self):
-        return self.end_balance
+    def get_num_of_transactions(self) -> int:
+        return len(self.experiment_timings)
     
-    def set_transaction_retries(self, retries):
-        self.transaction_retries = retries
+    def compute_statistics(self):
+        self.__sort_experiment_timings()
+        self.__compute_total_timing()
+        self.__compute_median_timing()
+        self.__compute_mean_timing()
+        
+    def __sort_experiment_timings(self):
+        self.experiment_timings.sort()
+        
+    def __compute_total_timing(self):
+        length = self.get_num_of_transactions()
+        sum = 0
+        for i in range(length):
+            sum += self.experiment_timings[i]
+        self.total_timing = sum
+        
     
-    def get_transaction_retries(self):
-        return self.transaction_retries
-
-    def get_throughput(self):
-        if self.num_of_transactions == -1:
-            return -1
+    def __compute_median_timing(self):
+        length = self.get_num_of_transactions() 
+        if length == 0:
+            self.median_timing = 0
+        if length % 2 == 0:
+            second_num = self.experiment_timings[length // 2]
+            first_num = self.experiment_timings[length // 2 - 1]
+            self.median_timing = (second_num + first_num) / 2
         else:
-            return self.num_of_transactions/self.get_response_time()
-
-    def set_experiment_parameters(self, experiment_parameters):
-        self.experiment_parameters = experiment_parameters
-        self.set_num_of_transactions(experiment_parameters["NUM_OF_TRANSACTION"])
+            self.median_timing = self.experiment_timings[(length - 1) // 2]
+            
+    def __compute_mean_timing(self):
+        self.mean_timing = self.total_timing / self.get_num_of_transactions()
 
     def print_experiment_setup(self):
         print("------------ EXPERIMENT SETTINGS ------------")
-        print("Isolation Level: ",
-              self.experiment_parameters["ISOLATION_LEVEL"])
-        print("Select Query Type: ",
-              self.experiment_parameters["SELECT_QUERY_TYPE"])
-        print("Number of Threads: ", self.experiment_parameters["NUM_THREADS"])
-        print("Start Balance: ", self.experiment_parameters["START_BALANCE"])
-        print("Withdrawal Amount: ",
-              self.experiment_parameters["WITHDRAWAL_AMOUNT"])
+        print("Value of Indexing experiment")
+        if self.is_index_type:
+            print("Index[X]")
+        else:
+            print("Index[]")
+        if self.is_query_type:
+            print("Query[X], Insert[]")
+        else:
+            print("Query[], Insert[X]")
         print("---------------------------------------------")
 
     def print_results(self):
         print("---------------- STATISTICS -----------------")
-
-        end_balance = self.get_end_balance()
-        print('End Balance: ', end_balance if end_balance != -1 else "INVALID")
-        print('\nBased on application level check implemented during withdrawal transaction,\nwithdrawal (UPDATE statement) should only be executed if there is sufficient prior balance (from SELECT statement).\nHence, end balance ideally should be >= 0, not negative, if no concurrency anomaly is encountered.')
-        print('Is end balance valid? ', end_balance >= 0)
-
-        response_time = self.get_response_time()
-        throughput = self.get_throughput()
-        print("\nResponse Time: ", round(response_time,2) if response_time != -1 else "INVALID")
-        print("Throughput: ", round(throughput,2) if throughput != -1 else "INVALID")
-
-        print("\nNumber of Transactions: ", int(self.experiment_parameters["NUM_OF_TRANSACTION"]) if "NUM_OF_TRANSACTION" in self.experiment_parameters else "INVALID")
-        print("Number of Transaction Retries: ", self.get_transaction_retries())
-
+        experiment_type = "query" if self.is_query_type else "insert"
+        print(f"Total number of {experiment_type} transactions: ", self.get_num_of_transactions())
+        print(f"Total time taken: ", self.total_timing)
+        print(f"Mean: ", self.mean_timing)
+        print(f"Median: ", self.median_timing)
+        all_timing_str = "All timings: "
+        for i in range(self.get_num_of_transactions()):
+            all_timing_str += str(self.experiment_timings[i]) + ", "
+        all_timing_str = all_timing_str[0: len(all_timing_str) - 2]
+        print(all_timing_str)
         print("---------------------------------------------")

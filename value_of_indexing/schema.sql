@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS "nonrepeatable_read_accounts";
-CREATE TABLE "nonrepeatable_read_accounts" (
+DROP TABLE IF EXISTS "indexing";
+CREATE TABLE "indexing" (
     "id" INT PRIMARY KEY,
-    "balance" INT NOT NULL DEFAULT 0
+    "age" INT NOT NULL
 );
