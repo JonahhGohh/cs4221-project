@@ -88,12 +88,12 @@ def setup_db():
         cur.execute(schema_file)
         conn.commit()
         cur.execute(seed_file)
+        conn.commit()
     except psycopg2.errors.DuplicateTable:
         print('Experiment table already created, skipping...')
     except Exception as e:
         print('Error creating Experiment table', e)
-
-    conn.commit()
+    
     cur.close()
     conn.close()
 
