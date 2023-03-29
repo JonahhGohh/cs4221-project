@@ -52,10 +52,10 @@ class Statistics:
         print("---------------- STATISTICS -----------------")
 
         ratio_correct_sum = self.get_ratio_correct_count()
-        print("Ratio of Correct Sum Count: ", ratio_correct_sum if ratio_correct_sum != -1 else "INVALID")
+        print("Ratio of Correct Sum Count: ", round(ratio_correct_sum, 4) if ratio_correct_sum != -1 else "INVALID")
 
         throughput = self.get_throughput()
-        print("Swap Throughput: ", throughput if throughput != -1 else "INVALID")
+        print("Swap Throughput: ", f"{round(throughput, 2)} transaction/second" if throughput != -1 else "INVALID")
         sum_count = self.get_sum_count()
         print("Number of Sum Transactions: ", sum_count if sum_count != -1 else "INVALID")
         
