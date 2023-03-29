@@ -21,3 +21,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  value_composite_indexes_experiment:
+    build: ./value_composite_indexes_experiment/
+    depends_on:
+      db:
+        condition: service_healthy

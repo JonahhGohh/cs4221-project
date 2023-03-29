@@ -15,7 +15,7 @@ db_config = {
 def setup_db():
     conn = get_conn()
     cur = conn.cursor()
-    schema_file = get_file("compare_indexes_experiment/schema.sql")
+    schema_file = get_file("schema.sql")
 
     try:
         cur.execute(schema_file)
