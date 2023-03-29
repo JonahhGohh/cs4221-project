@@ -6,7 +6,7 @@ from math import floor
 # Connecting to postgresql in container
 connection_pool = psycopg2.pool.SimpleConnectionPool(
     minconn=1,
-    maxconn=5,
+    maxconn=2,
     dbname="postgres",
     user="postgres",
     password="1234",
