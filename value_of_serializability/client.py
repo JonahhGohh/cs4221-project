@@ -95,6 +95,7 @@ def main():
   stats.set_sum_count(sum_count)
   stats.set_sum_correct_count(sum_correct_count)
   stats.print_stats()  
+
 if __name__ == '__main__':
     main()
     
