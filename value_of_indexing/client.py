@@ -1,8 +1,8 @@
 from db import *
 from stats import *
 
-NUM_OF_QUERIES = 10000
-NUM_OF_INSERT = 10000
+NUM_OF_QUERIES = 100
+NUM_OF_INSERT = 100
 LAST_ID_OF_SEED = 1000000
 
 def run_experiments():

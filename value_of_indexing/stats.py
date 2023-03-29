@@ -43,7 +43,7 @@ class Statistics:
     def print_results(self):
         print("---------------- STATISTICS -----------------")
         experiment_type = "query" if self.is_query_type else "insert"
-        print(f"Total number of {experiment_type} transactions: ", self.get_num_of_transactions())
+        print(f"Total number of {experiment_type} transactions: ", self.num_of_queries)
         print(f"Total time taken: ", self.experiment_timing)
         print(f"Mean time for 1 query: ", self.mean_time_for_one_query)
         print("---------------------------------------------")
