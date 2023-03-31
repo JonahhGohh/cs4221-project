@@ -80,7 +80,8 @@ def run_experiment(ISOLATION_LEVEL, NUM_THREADS, NUM_OF_SWAP_TRANSACTIONS):
   (sum_count, sum_correct_count) = sum_results[0]
   stats.set_sum_count(sum_count)
   stats.set_sum_correct_count(sum_correct_count)
-  
+
+  return stats
 
 def reset_global_parameters():
   global id_counter, end_flag
