@@ -32,6 +32,7 @@ EXPERIMENT_SETUP = [
 NUM_OF_SWAP_TRANSACTIONS = 10000
 
 def main():
+    print('You may see many serialization errors from dbms if isolation level = SERIALIZABLE, this is normal, do not be alarmed.')
     stats_list = []
     for experiment_parameters in EXPERIMENT_SETUP:
         stats = run_experiment(**experiment_parameters, NUM_OF_SWAP_TRANSACTIONS = NUM_OF_SWAP_TRANSACTIONS)
