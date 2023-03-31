@@ -16,8 +16,8 @@ services:
       interval: 2s
       timeout: 5s
       retries: 5
-  value_of_serializability:
-    build: ./value_of_serializability/
+  insertion_serialization_anomaly:
+    build: ./
     depends_on:
       db:
         condition: service_healthy
