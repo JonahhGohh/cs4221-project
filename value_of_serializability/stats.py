@@ -3,6 +3,7 @@ import time
 class Statistics:
     
     def __init__(self):
+        self.experiment_parameters = {}
         self.start_time = -1
         self.end_time = -1
         self.sum_count = -1
@@ -27,8 +28,9 @@ class Statistics:
     def set_sum_correct_count(self, sum_correct_count):
         self.sum_correct_count = sum_correct_count
 
-    def set_num_of_swap_transactions(self, num_of_swap_transactions):
-        self.num_of_swap_transactions = num_of_swap_transactions
+    def set_experiment_parameters(self, experiment_parameters):
+        self.experiment_parameters = experiment_parameters
+        self.num_of_swap_transactions = experiment_parameters["NUM_OF_SWAP_TRANSACTIONS"]
 
     def get_ratio_correct_count(self):
         if self.sum_correct_count == -1 or self.sum_count == -1:
@@ -48,7 +50,14 @@ class Statistics:
         else:
             return self.num_of_swap_transactions/self.get_response_time()
     
-    def print_stats(self):
+    def print_experiment_setup(self):
+        print("------------ EXPERIMENT SETTINGS ------------")
+        print("Number of Swap Transactions: ", self.num_of_swap_transactions)
+        print("Isolation Level: ", self.experiment_parameters["ISOLATION_LEVEL"])
+        print("Number of Threads: ", self.experiment_parameters["NUM_THREADS"])
+        print("---------------------------------------------")
+
+    def print_results(self):
         print("---------------- STATISTICS -----------------")
 
         ratio_correct_sum = self.get_ratio_correct_count()
