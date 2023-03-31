@@ -71,17 +71,20 @@ def main():
   for i in range(NUM_THREADS):
     sum_insert_thread = Thread(target=execute_sum_insert)
     sum_insert_threads.append(sum_insert_thread)
-    
+  
+  stats.start_timer()
   for i in range(NUM_THREADS):
     sum_insert_threads[i].start()
   for i in range(NUM_THREADS):
     sum_insert_threads[i].join()
   sum_insert_client_thread.start()
   sum_insert_client_thread.join()
+  stats.end_timer()
   (sum_count, sum_correct_count) = results[0]
   
   stats.set_sum_count(sum_count)
   stats.set_sum_correct_count(sum_correct_count)
+  print('RESPONSE TIME:', stats.get_response_time())
   stats.print_stats()
 if __name__ == '__main__':
     main()
