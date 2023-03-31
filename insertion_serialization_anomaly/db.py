@@ -12,9 +12,9 @@ db_config = {
     "port": "5432"
 }
 
-table_name = "serializability_1"
+table_name = "serializability_2"
 
-def count_b(isolation_level, table_name = "serializability_1"):
+def count_b(isolation_level):
     conn = get_conn()
     result = 0 # If serialization error, return 0 to cause wrong result instead of crashing the script
 
@@ -42,7 +42,7 @@ def count_b(isolation_level, table_name = "serializability_1"):
     conn.close()
     return result
 
-def sum_b(isolation_level, table_name = "serializability_1"):
+def sum_b(isolation_level):
     conn = get_conn()
     result = 0 # If serialization error, return 0 to cause wrong result instead of crashing the script
 
@@ -70,7 +70,7 @@ def sum_b(isolation_level, table_name = "serializability_1"):
     conn.close()
     return result
 
-def sum_insert(isolation_level, insert_id, table_name = 'serializability_2'):
+def sum_insert(isolation_level, insert_id):
     conn = get_conn()
     result = 0
 

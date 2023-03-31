@@ -32,9 +32,9 @@ def print_experiment_settings():
 def execute_sum_insert_client(results):
     sum_count = 0
     sum_correct_count = 0
-    b_sum = sum_b(ISOLATION_LEVEL, 'serializability_2')
+    b_sum = sum_b(ISOLATION_LEVEL)
     # sum_insert_counter cannot be used to retrieve num of rows due to potential rollbacks
-    b_rows = count_b(ISOLATION_LEVEL, 'serializability_2')
+    b_rows = count_b(ISOLATION_LEVEL)
     sum_count += 1
     if b_sum == (CONSTANT_SUM_INSERT_SUM * (2 ** (b_rows - NUM_SUM_INSERT_ROWS))):
         sum_correct_count += 1
