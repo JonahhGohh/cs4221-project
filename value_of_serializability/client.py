@@ -88,6 +88,7 @@ def run_experiment(num_of_swap_transactions, num_threads, isolation_level):
   stats.set_sum_count(sum_count)
   stats.set_sum_correct_count(sum_correct_count)
   stats.print_stats()  
+
   reset()
 
 
@@ -99,4 +100,5 @@ def reset():
 
 # if __name__ == '__main__':
 #     run_experiment(1000, 20, extensions.ISOLATION_LEVEL_REPEATABLE_READ)
+
     
