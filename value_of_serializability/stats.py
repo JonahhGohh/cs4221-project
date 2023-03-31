@@ -35,6 +35,12 @@ class Statistics:
             return -1
         else:
             return self.sum_correct_count/self.sum_count
+    
+    def get_sum_count(self):
+        if self.sum_count == -1:
+            return -1
+        else:
+            return self.sum_count
 
     def get_throughput(self):
         if self.num_of_swap_transactions == -1:
@@ -49,7 +55,9 @@ class Statistics:
         print("Ratio of Correct Sum Count: ", ratio_correct_sum if ratio_correct_sum != -1 else "INVALID")
 
         throughput = self.get_throughput()
-        print("Throughput: ", throughput if throughput != -1 else "INVALID")
+        print("Swap Throughput: ", throughput if throughput != -1 else "INVALID")
+        sum_count = self.get_sum_count()
+        print("Number of Sum Transactions: ", sum_count if sum_count != -1 else "INVALID")
         
         print("---------------------------------------------")
 

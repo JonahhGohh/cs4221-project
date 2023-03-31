@@ -10,18 +10,43 @@ EXPERIMENT_SETUP = [
         "ISOLATION_LEVEL": "READ_COMMITTED",
         # Must be a key from SELECT_QUERY_TYPES
         "SELECT_QUERY_TYPE": "NORMAL_SELECT",
+        # Must be >= 2 to simulate concurrent transactions
+        "NUM_THREADS": 5
     },
     {
         "ISOLATION_LEVEL": "READ_COMMITTED",
-        "SELECT_QUERY_TYPE": "SELECT_FOR_UPDATE"
+        "SELECT_QUERY_TYPE": "SELECT_FOR_UPDATE",
+        "NUM_THREADS": 5
     },
     {
         "ISOLATION_LEVEL": "REPEATABLE_READ",
-        "SELECT_QUERY_TYPE": "NORMAL_SELECT"
+        "SELECT_QUERY_TYPE": "NORMAL_SELECT",
+        "NUM_THREADS": 5
     },
     {
         "ISOLATION_LEVEL": "SERIALIZABLE",
-        "SELECT_QUERY_TYPE": "NORMAL_SELECT"
+        "SELECT_QUERY_TYPE": "NORMAL_SELECT",
+        "NUM_THREADS": 5
+    },
+    {
+        "ISOLATION_LEVEL": "READ_COMMITTED",
+        "SELECT_QUERY_TYPE": "NORMAL_SELECT",
+        "NUM_THREADS": 30
+    },
+    {
+        "ISOLATION_LEVEL": "READ_COMMITTED",
+        "SELECT_QUERY_TYPE": "SELECT_FOR_UPDATE",
+        "NUM_THREADS": 30
+    },
+    {
+        "ISOLATION_LEVEL": "REPEATABLE_READ",
+        "SELECT_QUERY_TYPE": "NORMAL_SELECT",
+        "NUM_THREADS": 30
+    },
+    {
+        "ISOLATION_LEVEL": "SERIALIZABLE",
+        "SELECT_QUERY_TYPE": "NORMAL_SELECT",
+        "NUM_THREADS": 30
     },
 ]
 
@@ -38,7 +63,7 @@ LIBRARY_ISOLATION_LEVELS = {
 }
 isolation_level = None
 
-NUM_THREADS = 10
+num_threads = 0
 START_BALANCE = 200000
 WITHDRAWAL_AMOUNT = 20
 # This should be kept constant across the different experiments
@@ -74,11 +99,13 @@ def execute_withdrawal_client():
 def reset_global_parameters(experiment_parameters):
     global transaction_counter
     global transaction_retries
+    global num_threads
     global isolation_level
     global select_query_type
 
     transaction_counter = 0
     transaction_retries = 0
+    num_threads = experiment_parameters["NUM_THREADS"]
     isolation_level = LIBRARY_ISOLATION_LEVELS[experiment_parameters["ISOLATION_LEVEL"]]
     select_query_type = SELECT_QUERY_TYPES[experiment_parameters["SELECT_QUERY_TYPE"]]
 
@@ -91,23 +118,23 @@ def run_experiments():
     for experiment_parameters in EXPERIMENT_SETUP:
         setup_db()
         stats = Statistics()
-        stats.set_experiment_parameters({**experiment_parameters, "NUM_THREADS": NUM_THREADS, "NUM_OF_TRANSACTION": NUM_OF_TRANSACTION,
+        stats.set_experiment_parameters({**experiment_parameters, "NUM_OF_TRANSACTION": NUM_OF_TRANSACTION,
                                         "START_BALANCE": START_BALANCE, "WITHDRAWAL_AMOUNT": WITHDRAWAL_AMOUNT})
         reset_global_parameters(experiment_parameters)
         reset_balance(START_BALANCE)
 
         withdrawal_threads = list()
-        for i in range(NUM_THREADS):
+        for i in range(num_threads):
             withdrawal_thread = Thread(target=execute_withdrawal_client)
             withdrawal_threads.append(withdrawal_thread)
 
         stats.start_timer()
 
         # Concurrently execute transactions
-        for i in range(NUM_THREADS):
+        for i in range(num_threads):
             withdrawal_threads[i].start()
 
-        for i in range(NUM_THREADS):
+        for i in range(num_threads):
             withdrawal_threads[i].join()
 
         stats.end_timer()
