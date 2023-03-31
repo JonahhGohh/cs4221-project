@@ -47,7 +47,10 @@ def get_first_name_execution_plan():
     try:
         cur.execute("EXPLAIN ANALYSE SELECT * FROM composite_index_experiment WHERE first_name = 'Fionna' ")
         row = cur.fetchall()
-        print(row)
+        # print(row)
+        print("Statistics of first query (with first_name)")
+        print("Planning time: ", row[5])
+        print("Execution time: ", row[6])
     except Exception as e:
         print('Error retrieving data', e)
 
@@ -68,7 +71,11 @@ def get_last_name_execution_plan():
     try:
         cur.execute("EXPLAIN ANALYSE SELECT * FROM composite_index_experiment WHERE last_name = 'Levison' ")
         row = cur.fetchall()
-        print(row)
+        # print(row)
+        print("Statistics of second query (with last_name)")
+        print("Planning time: ", row[3])
+        print("Execution time: ", row[4])
+
     except Exception as e:
         print('Error retrieving data', e)
 
