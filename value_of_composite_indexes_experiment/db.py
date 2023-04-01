@@ -49,10 +49,42 @@ def get_first_name_execution_plan():
         row = cur.fetchall()
         # print(row)
         print("Statistics of first query (with first_name)")
-        print("Planning time: ", row[5])
-        print("Execution time: ", row[6])
+        print("Planning time: ", row[-2])
+        print("Execution time: ", row[-1])
     except Exception as e:
         print('Error retrieving data', e)
+
+def get_first_name_last_name_not_using_index_execution_plan():
+    conn = get_conn()
+    cur = conn.cursor()
+
+    try:
+        # absence of equality condition 
+        cur.execute("EXPLAIN ANALYSE SELECT * FROM composite_index_experiment WHERE first_name > 'G' and last_name > 'G'")
+        row = cur.fetchall()
+        # print(row)
+        print("Strategy: ", row[0])
+        print("Planning time: ", row[-2])
+        print("Execution time: ", row[-1])
+    except Exception as e:
+        print('Error retrieving data', e)
+
+def get_first_name_last_name_using_index_execution_plan():
+    conn = get_conn()
+    cur = conn.cursor()
+
+    try:
+        # presence of equality condition 
+        cur.execute("EXPLAIN ANALYSE SELECT * FROM composite_index_experiment WHERE first_name = 'G' and last_name > 'G'")
+        row = cur.fetchall()
+        # print(row)
+        print("Strategy: ", row[0])
+        print("Planning time: ", row[-2])
+        print("Execution time: ", row[-1])
+
+    except Exception as e:
+        print('Error retrieving data', e)
+
 
 
 def get_last_name():
