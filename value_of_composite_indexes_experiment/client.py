@@ -20,7 +20,7 @@ def run_experiment():
 
 
     print("\nUsing both inequality checks for both parts of condition")
-    print("Statistics of third query (not using equality operator on index)")
+    print("Statistics of fourth query (not using equality operator on index)")
     get_first_name_last_name_not_using_index_execution_plan() # Does not use Index
 
     print("-----------------End of Experiment-----------------")
