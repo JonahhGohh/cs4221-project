@@ -1,7 +1,7 @@
-from stats import Statistics
-from db import *
 from threading import Thread, Lock
 from psycopg2 import extensions
+from stats import Statistics
+from db import *
 
 CONSTANT_SUM = 500000500000
 id_counter = 1
@@ -9,23 +9,16 @@ end_flag = False
 id_counter_lock = Lock()
 
 LIBRARY_ISOLATION_LEVELS = {
-  extensions.ISOLATION_LEVEL_READ_COMMITTED : "READ_COMMITTED",
-  extensions.ISOLATION_LEVEL_REPEATABLE_READ : "REPEATABLE_READ",
-  extensions.ISOLATION_LEVEL_SERIALIZABLE : "SERIALIZABLE"
+    "READ_COMMITTED": extensions.ISOLATION_LEVEL_READ_COMMITTED,
+    "REPEATABLE_READ": extensions.ISOLATION_LEVEL_REPEATABLE_READ,
+    "SERIALIZABLE": extensions.ISOLATION_LEVEL_SERIALIZABLE,
 }
-
-def print_experiment_settings(num_of_swap_transactions, num_threads, isolation_level):
-  print("------------ EXPERIMENT SETTINGS ------------")
-  print("Number of Swap Transactions: ", num_of_swap_transactions)
-  print("Number of Threads: ", num_threads)
-  print("Isolation Level: ", LIBRARY_ISOLATION_LEVELS[isolation_level])
-  print("---------------------------------------------")
 
 def execute_sum_client(isolation_level, results):
   sum_count = 0
   sum_correct_count = 0
   while not end_flag:
-    result = sum_b(isolation_level)
+    result = sum_b(LIBRARY_ISOLATION_LEVELS[isolation_level])
     # if value is not read from the db, continue and try again
     if result == 0:
       continue
@@ -46,59 +39,52 @@ def execute_swap_client(isolation_level, num_of_swap_transactions):
     curr_id_counter = id_counter
     id_counter += 2
     id_counter_lock.release()
-    swap_b(isolation_level, curr_id_counter)
+    swap_b(LIBRARY_ISOLATION_LEVELS[isolation_level], curr_id_counter)
     
 
-def run_experiment(num_of_swap_transactions, num_threads, isolation_level):
+def run_experiment(ISOLATION_LEVEL, NUM_THREADS, NUM_OF_SWAP_TRANSACTIONS):
   global end_flag
   
   # setup db
   setup_db()
-
-  # print the experiment settings
-  print_experiment_settings(num_of_swap_transactions, num_threads, isolation_level)
-  
-  # execute the sum_thread
-  results = []
-  sum_thread = Thread(target=execute_sum_client, args=(isolation_level, results,))
-  swap_threads = list()
+  reset_global_parameters()
 
   # create statistics object
   stats = Statistics()
+  stats.set_experiment_parameters({"ISOLATION_LEVEL": ISOLATION_LEVEL,
+                                  "NUM_THREADS": NUM_THREADS, "NUM_OF_SWAP_TRANSACTIONS": NUM_OF_SWAP_TRANSACTIONS})
+
+  # execute the sum_thread
+  sum_results = []
+  sum_thread = Thread(target=execute_sum_client, args=(ISOLATION_LEVEL, sum_results,))
+  swap_threads = list()
 
   # execute all the swap threads
-  for i in range(num_threads):
-    swap_thread = Thread(target=execute_swap_client, args=(isolation_level, num_of_swap_transactions))
+  for i in range(NUM_THREADS):
+    swap_thread = Thread(target=execute_swap_client, args=(ISOLATION_LEVEL, NUM_OF_SWAP_TRANSACTIONS))
     swap_threads.append(swap_thread)
 
   sum_thread.start()
   # start timer
   stats.start_timer()
-  for i in range(num_threads):
+  for i in range(NUM_THREADS):
     swap_threads[i].start()
 
-  for i in range(num_threads):
+  for i in range(NUM_THREADS):
     swap_threads[i].join()
   end_flag = True
+
   # end timer
   stats.end_timer()
   sum_thread.join()
-  (sum_count, sum_correct_count) = results[0]
-  stats.set_num_of_swap_transactions(num_of_swap_transactions)
+  (sum_count, sum_correct_count) = sum_results[0]
   stats.set_sum_count(sum_count)
   stats.set_sum_correct_count(sum_correct_count)
-  stats.print_stats()  
 
-  reset()
+  return stats
 
-
-
-def reset():
+def reset_global_parameters():
   global id_counter, end_flag
   id_counter = 1
   end_flag = False
 
-# if __name__ == '__main__':
-#     run_experiment(1000, 20, extensions.ISOLATION_LEVEL_REPEATABLE_READ)
-
-    
