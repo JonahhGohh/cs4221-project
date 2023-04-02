@@ -30,16 +30,6 @@ def setup_db():
     conn.close()
 
 
-def get_first_name():
-    conn = get_conn()
-    cur = conn.cursor()
-
-    try:
-        cur.execute("SELECT * FROM composite_index_experiment WHERE first_name = 'Fionna' ")
-    except Exception as e:
-        print('Error retrieving data', e)
-
-
 def get_first_name_execution_plan():
     conn = get_conn()
     cur = conn.cursor()
@@ -49,10 +39,13 @@ def get_first_name_execution_plan():
         row = cur.fetchall()
         # print(row)
         print("Statistics of first query (with first_name)")
+        print("Strategy: ", row[0])
         print("Planning time: ", row[-2])
         print("Execution time: ", row[-1])
     except Exception as e:
         print('Error retrieving data', e)
+
+
 
 def get_first_name_last_name_not_using_index_execution_plan():
     conn = get_conn()
@@ -63,6 +56,7 @@ def get_first_name_last_name_not_using_index_execution_plan():
         cur.execute("EXPLAIN ANALYSE SELECT * FROM composite_index_experiment WHERE first_name > 'G' and last_name > 'G'")
         row = cur.fetchall()
         # print(row)
+        print("Statistics of third query (not using equality operator on index)")
         print("Strategy: ", row[0])
         print("Planning time: ", row[-2])
         print("Execution time: ", row[-1])
@@ -78,6 +72,7 @@ def get_first_name_last_name_using_index_execution_plan():
         cur.execute("EXPLAIN ANALYSE SELECT * FROM composite_index_experiment WHERE first_name = 'G' and last_name > 'G'")
         row = cur.fetchall()
         # print(row)
+        print("Statistics of fourth query (using equality operator on index)")
         print("Strategy: ", row[0])
         print("Planning time: ", row[-2])
         print("Execution time: ", row[-1])
@@ -86,16 +81,6 @@ def get_first_name_last_name_using_index_execution_plan():
         print('Error retrieving data', e)
 
 
-
-def get_last_name():
-    conn = get_conn()
-    cur = conn.cursor()
-
-    try:
-        cur.execute("SELECT * FROM composite_index_experiment WHERE last_name = 'Levison' ")
-    except Exception as e:
-        print('Error retrieving data', e)
-
 def get_last_name_execution_plan():
     conn = get_conn()
     cur = conn.cursor()
@@ -103,10 +88,10 @@ def get_last_name_execution_plan():
     try:
         cur.execute("EXPLAIN ANALYSE SELECT * FROM composite_index_experiment WHERE last_name = 'Levison' ")
         row = cur.fetchall()
-        # print(row)
         print("Statistics of second query (with last_name)")
-        print("Planning time: ", row[3])
-        print("Execution time: ", row[4])
+        print("Strategy: ", row[0])
+        print("Planning time: ", row[-2])
+        print("Execution time: ", row[-1])
 
     except Exception as e:
         print('Error retrieving data', e)
